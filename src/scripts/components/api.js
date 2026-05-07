@@ -1,6 +1,6 @@
 const BASE_URL = 'https://mesto.nomoreparties.co/v1/apf-cohort-203';
 const HEADERS = {
-  authorization: 'abbf8a0a-d92b-4af0-ac2b-247425ba3430',
+  authorization: '6e54a417-278e-4aa1-a72d-60d3c6ba882e',
   'Content-Type': 'application/json',
 };
 
