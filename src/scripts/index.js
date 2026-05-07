@@ -35,14 +35,16 @@ const avatarForm = avatarPopup.querySelector('.popup__form');
 const avatarInput = avatarForm.querySelector('.popup__input');
 const avatarSaveBtn = avatarPopup.querySelector('.popup__button');
 
-const infoPopup = document.querySelector('.popup_type_card-info');
-const infoPreview = infoPopup.querySelector('.popup__card-preview');
-const infoStats = infoPopup.querySelector('.popup__info');
-const infoLikersList = infoPopup.querySelector('.popup__list');
+const statsPopup = document.querySelector('.popup_type_stats');
+const statsInfo = statsPopup.querySelector('.popup__info');
+const statsCardsList = statsPopup.querySelector('.popup__list');
 
 const profileTitle = document.querySelector('.profile__title');
 const profileAbout = document.querySelector('.profile__description');
 const profileAvatar = document.querySelector('.profile__image');
+const footer = document.querySelector('.footer__copyright');
+
+let cachedCards = [];
 
 const toDate = (iso) =>
   new Date(iso).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -54,8 +56,8 @@ const makeStatRow = (label, value) => {
   return el;
 };
 
-const makeLikerBadge = (name) => {
-  const el = document.getElementById('tpl-liker-badge').content.querySelector('.popup__list-item').cloneNode(true);
+const makeCardBadge = (name) => {
+  const el = document.getElementById('tpl-card-badge').content.querySelector('.popup__list-item').cloneNode(true);
   el.textContent = name;
   return el;
 };
@@ -69,7 +71,10 @@ const handleImage = (name, link) => {
 
 const handleDelete = (cardEl, cardId) => {
   removeCard(cardId)
-    .then(() => cardEl.remove())
+    .then(() => {
+      cardEl.remove();
+      cachedCards = cachedCards.filter((c) => c._id !== cardId);
+    })
     .catch(console.error);
 };
 
@@ -85,27 +90,27 @@ const handleLike = (cardEl, data, likeBtn, likeCount) => {
     .catch(console.error);
 };
 
-const handleInfo = (data) => {
-  infoPreview.src = data.link;
-  infoPreview.alt = data.name;
-  infoStats.innerHTML = '';
-  infoLikersList.innerHTML = '';
+const handleFooterClick = () => {
+  if (cachedCards.length === 0) return;
 
-  infoStats.append(
-    makeStatRow('Описание:', data.name),
-    makeStatRow('Дата создания:', toDate(data.createdAt)),
-    makeStatRow('Владелец:', data.owner.name),
-    makeStatRow('Количество лайков:', data.likes.length)
+  statsInfo.innerHTML = '';
+  statsCardsList.innerHTML = '';
+
+  const sorted = [...cachedCards].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  const totalLikes = cachedCards.reduce((sum, c) => sum + c.likes.length, 0);
+  const mostLiked = cachedCards.reduce((max, c) => (c.likes.length > max.likes.length ? c : max), cachedCards[0]);
+
+  statsInfo.append(
+    makeStatRow('Всего карточек:', cachedCards.length),
+    makeStatRow('Первая добавлена:', toDate(sorted[0].createdAt)),
+    makeStatRow('Последняя добавлена:', toDate(sorted[sorted.length - 1].createdAt)),
+    makeStatRow('Всего лайков:', totalLikes),
+    makeStatRow('Самая популярная:', `${mostLiked.name} (${mostLiked.likes.length})`)
   );
 
-  if (data.likes.length > 0) {
-    infoPopup.querySelector('.popup__text').style.display = '';
-    data.likes.forEach((u) => infoLikersList.append(makeLikerBadge(u.name)));
-  } else {
-    infoPopup.querySelector('.popup__text').style.display = 'none';
-  }
+  cachedCards.forEach((card) => statsCardsList.append(makeCardBadge(card.name)));
 
-  openPopup(infoPopup);
+  openPopup(statsPopup);
 };
 
 const renderCard = (data, userId, prepend = false) => {
@@ -113,7 +118,6 @@ const renderCard = (data, userId, prepend = false) => {
     onImage: handleImage,
     onLike: handleLike,
     onDelete: handleDelete,
-    onInfo: handleInfo,
   });
   cardsList[prepend ? 'prepend' : 'append'](el);
 };
@@ -136,6 +140,8 @@ profileAvatar.addEventListener('click', () => {
   clearValidation(avatarForm, VALIDATION);
   openPopup(avatarPopup);
 });
+
+footer.addEventListener('click', handleFooterClick);
 
 profileForm.addEventListener('submit', (e) => {
   e.preventDefault();
@@ -167,6 +173,7 @@ cardForm.addEventListener('submit', (e) => {
   cardSaveBtn.textContent = 'Создание...';
   addCard(cardNameInput.value, cardLinkInput.value)
     .then((data) => {
+      cachedCards.unshift(data);
       renderCard(data, data.owner._id, true);
       closePopup(cardPopup);
       cardForm.reset();
@@ -181,6 +188,7 @@ enableValidation(VALIDATION);
 
 Promise.all([getUser(), getCards()])
   .then(([user, cards]) => {
+    cachedCards = cards;
     profileTitle.textContent = user.name;
     profileAbout.textContent = user.about;
     profileAvatar.style.backgroundImage = `url(${user.avatar})`;
