@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Mesto</title>
-    <script type="module" crossorigin src="./assets/index-CipM-gLO.js"></script>
+    <script type="module" crossorigin src="./assets/index-BKhXivBW.js"></script>
     <link rel="stylesheet" crossorigin href="./assets/index-D2vXu_v7.css">
   </head>
   <body class="page">
@@ -30,7 +30,7 @@
       </main>
 
       <footer class="footer page__section">
-        <p class="footer__copyright">© 2025 Mesto Russia</p>
+        <p class="footer__copyright" style="cursor:pointer">© 2025 Mesto Russia</p>
       </footer>
 
       <div class="popup popup_type_edit popup_is-animated">
@@ -119,13 +119,12 @@
         </div>
       </div>
 
-      <div class="popup popup_type_card-info popup_is-animated">
+      <div class="popup popup_type_stats popup_is-animated">
         <div class="popup__content popup__content_content_info">
           <button type="button" class="popup__close"></button>
-          <img class="popup__card-preview" src="" alt="" />
-          <h3 class="popup__title">Статистика карточки</h3>
+          <h3 class="popup__title">Статистика карточек</h3>
           <dl class="popup__info"></dl>
-          <h4 class="popup__text">Лайкнули:</h4>
+          <h4 class="popup__text">Все карточки:</h4>
           <ul class="popup__list"></ul>
         </div>
       </div>
@@ -136,7 +135,6 @@
       <li class="places__item card">
         <img class="card__image" src="" alt="" />
         <div class="card__control">
-          <button type="button" class="card__control-button card__control-button_type_info"></button>
           <button type="button" class="card__control-button card__control-button_type_delete"></button>
         </div>
         <div class="card__description">
@@ -156,7 +154,7 @@
       </div>
     </template>
 
-    <template id="tpl-liker-badge">
+    <template id="tpl-card-badge">
       <li class="popup__list-item popup__list-item_type_badge"></li>
     </template>
   </body>
