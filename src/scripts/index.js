@@ -42,7 +42,7 @@ const statsCardsList = statsPopup.querySelector('.popup__list');
 const profileTitle = document.querySelector('.profile__title');
 const profileAbout = document.querySelector('.profile__description');
 const profileAvatar = document.querySelector('.profile__image');
-const footer = document.querySelector('.footer__copyright');
+const logo = document.querySelector('.header__logo');
 
 let cachedCards = [];
 
@@ -141,7 +141,7 @@ profileAvatar.addEventListener('click', () => {
   openPopup(avatarPopup);
 });
 
-footer.addEventListener('click', handleFooterClick);
+logo.addEventListener('click', handleFooterClick);
 
 profileForm.addEventListener('submit', (e) => {
   e.preventDefault();
