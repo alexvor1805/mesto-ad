@@ -1,5 +1,5 @@
 import { getUser, getCards, updateUser, updateAvatar, addCard, removeCard, setLike, unsetLike } from './components/api.js';
-import { createCardElement } from './components/card.js';
+import { createCardElement, deleteCard, updateLikeState } from './components/card.js';
 import { openPopup, closePopup, initPopupClose } from './components/modal.js';
 import { enableValidation, clearValidation } from './components/validation.js';
 
@@ -72,7 +72,7 @@ const handleImage = (name, link) => {
 const handleDelete = (cardEl, cardId) => {
   removeCard(cardId)
     .then(() => {
-      cardEl.remove();
+      deleteCard(cardEl);
       cachedCards = cachedCards.filter((c) => c._id !== cardId);
     })
     .catch(console.error);
@@ -83,34 +83,37 @@ const handleLike = (cardEl, data, likeBtn, likeCount) => {
   const action = liked ? unsetLike : setLike;
   action(data._id)
     .then((updated) => {
-      likeBtn.classList.toggle('card__like-button_is-active');
-      likeCount.textContent = updated.likes.length;
+      updateLikeState(likeBtn, likeCount, updated.likes);
       data.likes = updated.likes;
     })
     .catch(console.error);
 };
 
 const handleFooterClick = () => {
-  if (cachedCards.length === 0) return;
+  getCards()
+    .then((cards) => {
+      if (cards.length === 0) return;
 
-  statsInfo.innerHTML = '';
-  statsCardsList.innerHTML = '';
+      statsInfo.innerHTML = '';
+      statsCardsList.innerHTML = '';
 
-  const sorted = [...cachedCards].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-  const totalLikes = cachedCards.reduce((sum, c) => sum + c.likes.length, 0);
-  const mostLiked = cachedCards.reduce((max, c) => (c.likes.length > max.likes.length ? c : max), cachedCards[0]);
+      const sorted = [...cards].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      const totalLikes = cards.reduce((sum, c) => sum + c.likes.length, 0);
+      const mostLiked = cards.reduce((max, c) => (c.likes.length > max.likes.length ? c : max), cards[0]);
 
-  statsInfo.append(
-    makeStatRow('Всего карточек:', cachedCards.length),
-    makeStatRow('Первая добавлена:', toDate(sorted[0].createdAt)),
-    makeStatRow('Последняя добавлена:', toDate(sorted[sorted.length - 1].createdAt)),
-    makeStatRow('Всего лайков:', totalLikes),
-    makeStatRow('Самая популярная:', `${mostLiked.name} (${mostLiked.likes.length})`)
-  );
+      statsInfo.append(
+        makeStatRow('Всего карточек:', cards.length),
+        makeStatRow('Первая добавлена:', toDate(sorted[0].createdAt)),
+        makeStatRow('Последняя добавлена:', toDate(sorted[sorted.length - 1].createdAt)),
+        makeStatRow('Всего лайков:', totalLikes),
+        makeStatRow('Самая популярная:', `${mostLiked.name} (${mostLiked.likes.length})`)
+      );
 
-  cachedCards.forEach((card) => statsCardsList.append(makeCardBadge(card.name)));
+      cards.forEach((card) => statsCardsList.append(makeCardBadge(card.name)));
 
-  openPopup(statsPopup);
+      openPopup(statsPopup);
+    })
+    .catch(console.error);
 };
 
 const renderCard = (data, userId, prepend = false) => {

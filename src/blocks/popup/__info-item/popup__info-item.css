@@ -1,5 +1,6 @@
 .popup__info-item {
     display: flex;
-    align-items: center;
-    gap: 12px;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
 }
