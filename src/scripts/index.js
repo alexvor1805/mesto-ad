@@ -35,6 +35,9 @@ const avatarForm = avatarPopup.querySelector('.popup__form');
 const avatarInput = avatarForm.querySelector('.popup__input');
 const avatarSaveBtn = avatarPopup.querySelector('.popup__button');
 
+const removeCardPopup = document.querySelector('.popup_type_remove-card');
+const removeCardConfirmBtn = removeCardPopup.querySelector('.popup__button_type_confirm');
+
 const statsPopup = document.querySelector('.popup_type_stats');
 const statsInfo = statsPopup.querySelector('.popup__info');
 const statsCardsList = statsPopup.querySelector('.popup__list');
@@ -69,14 +72,25 @@ const handleImage = (name, link) => {
   openPopup(imagePopup);
 };
 
+let pendingDelete = null;
+
 const handleDelete = (cardEl, cardId) => {
+  pendingDelete = { cardEl, cardId };
+  openPopup(removeCardPopup);
+};
+
+removeCardConfirmBtn.addEventListener('click', () => {
+  if (!pendingDelete) return;
+  const { cardEl, cardId } = pendingDelete;
   removeCard(cardId)
     .then(() => {
       deleteCard(cardEl);
       cachedCards = cachedCards.filter((c) => c._id !== cardId);
+      closePopup(removeCardPopup);
+      pendingDelete = null;
     })
     .catch(console.error);
-};
+});
 
 const handleLike = (cardEl, data, likeBtn, likeCount) => {
   const liked = likeBtn.classList.contains('card__like-button_is-active');
