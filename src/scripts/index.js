@@ -82,6 +82,7 @@ const handleDelete = (cardEl, cardId) => {
 removeCardConfirmBtn.addEventListener('click', () => {
   if (!pendingDelete) return;
   const { cardEl, cardId } = pendingDelete;
+  removeCardConfirmBtn.textContent = 'Удаление...';
   removeCard(cardId)
     .then(() => {
       deleteCard(cardEl);
@@ -89,7 +90,10 @@ removeCardConfirmBtn.addEventListener('click', () => {
       closePopup(removeCardPopup);
       pendingDelete = null;
     })
-    .catch(console.error);
+    .catch(console.error)
+    .finally(() => {
+      removeCardConfirmBtn.textContent = 'Да';
+    });
 });
 
 const handleLike = (cardEl, data, likeBtn, likeCount) => {
