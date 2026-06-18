@@ -115,19 +115,37 @@ const handleFooterClick = () => {
       statsInfo.innerHTML = '';
       statsCardsList.innerHTML = '';
 
-      const sorted = [...cards].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      // Уникальные пользователи из лайков
+      const allUsers = new Set();
+      cards.forEach((c) => c.likes.forEach((u) => allUsers.add(u._id)));
+
+      // Всего лайков
       const totalLikes = cards.reduce((sum, c) => sum + c.likes.length, 0);
-      const mostLiked = cards.reduce((max, c) => (c.likes.length > max.likes.length ? c : max), cards[0]);
+
+      // Максимум лайков от одного пользователя на одну карточку
+      const maxLikes = Math.max(...cards.map((c) => c.likes.length));
+
+      // Чемпион лайков — карточка с наибольшим числом лайков
+      // Чемпион — пользователь с максимальным количеством лайков на разных карточках
+      const userLikes = {};
+      const userNames = {};
+      cards.forEach((c) => c.likes.forEach((u) => {
+        userLikes[u._id] = (userLikes[u._id] || 0) + 1;
+        userNames[u._id] = u.name;
+      }));
+      const championId = Object.keys(userLikes).reduce((a, b) => userLikes[a] > userLikes[b] ? a : b);
+      const champion = userNames[championId];
 
       statsInfo.append(
-        makeStatRow('Всего карточек:', cards.length),
-        makeStatRow('Первая добавлена:', toDate(sorted[0].createdAt)),
-        makeStatRow('Последняя добавлена:', toDate(sorted[sorted.length - 1].createdAt)),
+        makeStatRow('Всего пользователей:', allUsers.size),
         makeStatRow('Всего лайков:', totalLikes),
-        makeStatRow('Самая популярная:', `${mostLiked.name} (${mostLiked.likes.length})`)
+        makeStatRow('Максимально лайков от одного:', maxLikes),
+        makeStatRow('Чемпион лайков:', champion)
       );
 
-      cards.forEach((card) => statsCardsList.append(makeCardBadge(card.name)));
+      // Топ 3 популярных карточки
+      const top3 = [...cards].sort((a, b) => b.likes.length - a.likes.length).slice(0, 3);
+      top3.forEach((card) => statsCardsList.append(makeCardBadge(card.name)));
 
       openPopup(statsPopup);
     })
